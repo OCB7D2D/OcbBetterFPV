@@ -1,0 +1,13 @@
+<configs>
+
+	<!--####################################################################-->
+	<!--####################################################################-->
+
+	<!-- shift the helmet light a little to the front in order to avoid self shading with (invisible) character -->
+	<!-- <setattribute xpath="/item_modifiers/item_modifier[@name='modArmorHelmetLight']/effect_group/triggered_effect[@parentTransform='Spotlight']" name="localPos">0,0,-0.3</setattribute>-->
+	<setattribute xpath="/item_modifiers/item_modifier[@name='modArmorHelmetLight']/effect_group/triggered_effect[@parentTransform='CameraNode']" name="localPos">0,0,-0.4</setattribute>
+
+	<!--####################################################################-->
+	<!--####################################################################-->
+
+</configs>
