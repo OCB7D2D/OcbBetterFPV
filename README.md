@@ -58,6 +58,10 @@ If so we probably will revert to a static shadow or no shadow at all.
 
 ## Changelog
 
+### Version 0.2.0
+
+- Fix aiming with scopes
+
 ### Version 0.1.0
 
 - Initial version

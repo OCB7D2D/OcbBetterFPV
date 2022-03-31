@@ -115,6 +115,30 @@ public class FirstPersonView : IModApi
             }
         }
     }
+    
+    [HarmonyPatch(typeof(ItemActionZoom))]
+    [HarmonyPatch("OnScreenOverlay")]
+    public class ItemActionZoom_OnScreenOverlay
+    {
+
+        static System.Type ActionDataZoom = AccessTools.TypeByName("ItemActionDataZoom");
+        static FieldInfo ActionDataZoomScope = ActionDataZoom.GetField("Scope");
+        static FieldInfo ActionDataZoomOverlay = ActionDataZoom.GetField("ZoomOverlay");
+        static FieldInfo ActionDataZoomInProgress = ActionDataZoom.GetField("bZoomInProgress");
+
+        public static void Postfix(ItemActionData _actionData)
+        {
+            if (_actionData.invData.holdingEntity is EntityPlayerLocal player)
+            {
+                if (player.AimingGun == false) return;
+                if (ActionDataZoomScope.GetValue(_actionData) == null) return;
+                if ((bool)ActionDataZoomInProgress.GetValue(_actionData)) return;
+                if (ActionDataZoomOverlay.GetValue(_actionData) == null) return;
+                if (player.playerCamera != null) player.playerCamera.cullingMask &= -1025;
+            }
+
+        }
+    }
 
     [HarmonyPatch(typeof(ItemActionZoom))]
     [HarmonyPatch("startEndZoom")]
@@ -125,6 +149,7 @@ public class FirstPersonView : IModApi
             if (enabled == false) return;
             if (GameManager.Instance.World.GetPrimaryPlayer() is EntityPlayerLocal player)
             {
+                if (player.playerCamera != null) player.playerCamera.cullingMask |= 1024;
                 // Weapons Camera never shows the character/hand (remove layer 1024)
                 if (player.weaponCamera != null) player.weaponCamera.cullingMask &= -1025;
             }
