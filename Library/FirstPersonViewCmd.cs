@@ -16,10 +16,14 @@ public class FirstPersonViewCmd : ConsoleCmdAbstract
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
 
-        var player = GameManager.Instance.World.GetPrimaryPlayer();
+        EntityPlayerLocal player = GameManager.Instance.World.GetPrimaryPlayer();
+
+        var tst = player.emodel.avatarController;
+        tst.SetLookPosition(new Vector3(0f, 1f, 0f));
 
         switch (_params.Count)
         {
+
             case 1:
                 switch (_params[0])
                 {

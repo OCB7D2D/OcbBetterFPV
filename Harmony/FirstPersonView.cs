@@ -40,6 +40,57 @@ public class FirstPersonView : IModApi
         }
     }
 
+    [HarmonyPatch(typeof(AvatarMultiBodyController))]
+    [HarmonyPatch("SetInRightHand")]
+    public class AvatarMultiBodyController_SetInRightHand
+    {
+
+        static Transform copied = null;
+
+        public static void Postfix(Transform _transform,
+            AvatarLocalPlayerController __instance)
+        {
+
+            // Bail out early if nothing to equip
+            if (_transform == null) return;
+
+            // Make sure `heldItemTransform` of `CharacterBody`
+            if (true)
+            {
+                if (__instance.Entity != null)
+                {
+                    var copy = CreateHeldItem(__instance.Entity,
+                        __instance.Entity.inventory.holdingItemItemValue,
+                        __instance.Entity.inventory.inactiveItems);
+                    if (copy != null && __instance?.CharacterBody?.Parts?.RightHand != null)
+                    {
+                        copy.SetParent(__instance.CharacterBody.Parts.RightHand, false);
+                        var asd = copy.GetComponentInChildren<Renderer>();
+                        if (asd != null) asd.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                        __instance.CharacterBody.Animator.enabled = true;
+                    }
+                    copy.gameObject.SetActive(true);
+                    if (copied != null)
+                    {
+                        copied.SetParent(null);
+                        copied.gameObject.SetActive(false);
+                    }
+                    copied = copy;
+                }
+            }
+        }
+    }
+
+    public static Transform CreateHeldItem(EntityAlive entity, ItemValue _itemValue, Transform parent)
+    {
+        Log.Out("CLonging {0} {1} {2}", entity, _itemValue, parent);
+        Transform transform = _itemValue.ItemClass.CloneModel(
+            entity.world, _itemValue, entity.GetPosition(),
+            parent, BlockShape.MeshPurpose.Hold);
+        if (transform != null) transform.gameObject.SetActive(false);
+        return transform;
+    }
+
     [HarmonyPatch(typeof(AvatarLocalPlayerController))]
     [HarmonyPatch("SwitchModelAndView")]
     public class AvatarLocalPlayerController_SwitchModelAndView
@@ -84,10 +135,18 @@ public class FirstPersonView : IModApi
                 fpsArmsAnimator.State = BodyAnimator.EnumState.Visible;
                 if (fpsArmsAnimator.Parts.BodyTransform is Transform bodyTransform)
                 {
-                    foreach (var arm in bodyTransform.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    foreach (var arm in bodyTransform.GetComponentsInChildren<Renderer>())
                     {
                         // Disable shadow casting for the "first person view arms"
                         arm.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    }
+                }
+                if (fpsArmsAnimator.Parts.RightHand is Transform handTransform)
+                {
+                    foreach (var hand in handTransform.GetComponentsInChildren<Renderer>())
+                    {
+                        // Disable shadow casting for the "first person view arms"
+                        hand.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                     }
                 }
             }
