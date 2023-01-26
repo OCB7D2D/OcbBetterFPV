@@ -1,5 +1,6 @@
 using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -206,6 +207,29 @@ public class FirstPersonView : IModApi
             ___ChangedAnimationParameters[_propertyHash] = new AnimParamData(
                 _propertyHash, AnimParamData.ValueTypes.Trigger, true);
             return false;
+        }
+    }
+
+    // Conditional patch for Undad Legacy
+    [HarmonyPatch]
+    class UndeadLegacyPatch
+    {
+        private static bool Prepare()
+        {
+            return ModManager.ModLoaded("UndeadLegacy_CoreModule");
+        }
+        public static MethodBase TargetMethod()
+        {
+            var mod = ModManager.GetMod("UndeadLegacy_CoreModule");
+            return AccessTools.FirstMethod(
+                mod.MainAssembly.GetTypes().First(
+                    (t) => t.Name == "ItemActionULM_Zoom"),
+                method => method.Name == "startEndZoom");
+        }
+        public static void Postfix()
+        {
+            if (GameManager.Instance.World.GetPrimaryPlayer() is EntityPlayerLocal player)
+                player.weaponCamera.cullingMask &= ~1024;
         }
     }
 
