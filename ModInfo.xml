@@ -5,6 +5,6 @@
 		<Description value="Better First Person View with proper shading and shadows." />
 		<Website value="https://github.com/OCB7D2D/OcbBetterFPV" />
 		<Author value="ocbMaurice" />
-		<Version value="0.2.1" compat="A20"/>
+		<Version value="0.2.2" compat="A20"/>
 	</ModInfo>
 </xml>

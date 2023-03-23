@@ -58,6 +58,11 @@ If so we probably will revert to a static shadow or no shadow at all.
 
 ## Changelog
 
+### Version 0.2.2
+
+- Improve self-shadow of e.g. headlamp
+- Fix light issue when holding torches
+
 ### Version 0.2.1
 
 - Fix an issue with Undead Legacy

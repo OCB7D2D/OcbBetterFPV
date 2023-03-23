@@ -9,7 +9,7 @@ public class FirstPersonView : IModApi
 
     public void InitMod(Mod mod)
     {
-        Debug.Log("Loading OCB First Person View Patch: " + GetType().ToString());
+        Log.Out("Loading OCB First Person View Patch: " + GetType().ToString());
         new Harmony(GetType().ToString()).PatchAll(Assembly.GetExecutingAssembly());
     }
 
@@ -54,6 +54,14 @@ public class FirstPersonView : IModApi
             {
                 // Show character (hand) for player camera
                 UpdatePlayerCamera(player.playerCamera);
+                // Change shadow settings for e.g. headlamp to avoid some self-shadowing
+                // Unfortunately didn't find a way to do this with culling masks only.
+                foreach (var light in player.transform.GetComponentsInChildren<Light>())
+                {
+                    light.cullingMask |= 1024;
+                    light.shadowNearPlane = 0.55f;
+                    light.shadowBias = 0.25f;
+                }
             }
 
             // Setup the main character body
@@ -129,6 +137,7 @@ public class FirstPersonView : IModApi
 
         public static void Postfix(ItemActionData _actionData)
         {
+            if (enabled == false) return;
             if (_actionData.invData.holdingEntity is EntityPlayerLocal player)
             {
                 if (player.AimingGun == false) return;
@@ -168,6 +177,16 @@ public class FirstPersonView : IModApi
                 FindInChilds("WeaponCamera").GetComponent<Camera>();
             // Weapons Camera never shows the character/hand
             if (camera != null) camera.cullingMask &= -1025;
+            // Disable duplicated? light for torches (and similar objects)
+            // Not exactly sure why this works, but tests seems to show it does
+            if (__instance.vp_FPCamera?.transform.FindInChilds("Light_FirstPerson") is Transform lfp)
+            {
+                foreach (var light in lfp.GetComponentsInChildren<LightLOD>())
+                {
+                    light.GetLight().enabled = false;
+                    light.enabled = false;
+                }
+            }
         }
     }
 
@@ -184,6 +203,7 @@ public class FirstPersonView : IModApi
             int _propertyHash)
         {
             ___changed = false;
+            if (enabled == false) return true;
             for (int index = 0; index < ___bodyAnimators.Count; ++index)
             {
                 if (___bodyAnimators[index].Animator != null &&
@@ -228,6 +248,7 @@ public class FirstPersonView : IModApi
         }
         public static void Postfix()
         {
+            if (enabled == false) return;
             if (GameManager.Instance.World.GetPrimaryPlayer() is EntityPlayerLocal player)
                 player.weaponCamera.cullingMask &= ~1024;
         }
