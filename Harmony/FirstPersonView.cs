@@ -9,8 +9,9 @@ public class FirstPersonView : IModApi
 
     public void InitMod(Mod mod)
     {
-        Log.Out("Loading OCB First Person View Patch: " + GetType().ToString());
-        new Harmony(GetType().ToString()).PatchAll(Assembly.GetExecutingAssembly());
+        Log.Out("OCB Harmony Patch: " + GetType().ToString());
+        Harmony harmony = new Harmony(GetType().ToString());
+        harmony.PatchAll(Assembly.GetExecutingAssembly());
     }
 
     private static bool enabled = true;
@@ -67,7 +68,7 @@ public class FirstPersonView : IModApi
             // Setup the main character body
             if (__instance.CharacterBody is BodyAnimator bodyAnimator)
             {
-                if (bodyAnimator.Parts.BodyTransform is Transform bodyTransform)
+                if (bodyAnimator.Parts.BodyObj.transform is Transform bodyTransform)
                 {
                     // Force body to be always visible (force shadow only later)
                     if (enabled) bodyAnimator.State = BodyAnimator.EnumState.Visible;
@@ -91,7 +92,7 @@ public class FirstPersonView : IModApi
             if (__instance.FPSArms is BodyAnimator fpsArmsAnimator)
             {
                 fpsArmsAnimator.State = BodyAnimator.EnumState.Visible;
-                if (fpsArmsAnimator.Parts.BodyTransform is Transform bodyTransform)
+                if (fpsArmsAnimator.Parts.BodyObj.transform is Transform bodyTransform)
                 {
                     foreach (var arm in bodyTransform.GetComponentsInChildren<SkinnedMeshRenderer>())
                     {
@@ -192,7 +193,7 @@ public class FirstPersonView : IModApi
 
     // Copied from original and added `fireEvents` condition
     [HarmonyPatch(typeof(AvatarMultiBodyController))]
-    [HarmonyPatch("SetTrigger")]
+    [HarmonyPatch("_setTrigger")]
     public class AvatarMultiBodyController_SetTrigger
     {
         public static bool Prefix(
@@ -242,7 +243,7 @@ public class FirstPersonView : IModApi
         {
             var mod = ModManager.GetMod("UndeadLegacy_CoreModule");
             return AccessTools.FirstMethod(
-                mod.MainAssembly.GetTypes().First(
+                Assembly.GetExecutingAssembly().GetTypes().First(
                     (t) => t.Name == "ItemActionULM_Zoom"),
                 method => method.Name == "startEndZoom");
         }

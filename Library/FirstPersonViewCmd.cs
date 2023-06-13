@@ -80,4 +80,22 @@ public class FirstPersonViewCmd : ConsoleCmdAbstract
 
     }
 
+    protected override string[] getCommands()
+    {
+        return new string[] {
+            "on",
+            "off",
+            "pc",
+            "gc",
+            "layers",
+            "pcl",
+            "gcl",
+        };
+    }
+
+    protected override string getDescription()
+    {
+        return "Mess with first person view settings";
+    }
+
 }

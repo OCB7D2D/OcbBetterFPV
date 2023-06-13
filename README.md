@@ -1,4 +1,4 @@
-# OCB Better First Person View Modlet - 7 Days to Die Addon
+# OCB Better First Person View Modlet - 7 Days to Die (A21) Addon
 
 Small Harmony Mod to enable true first person view camera in order
 to get proper shadows on the hand model and equipped tools. Or did
@@ -57,6 +57,10 @@ I've patched this up in the hope I didn't miss any further edge-cases.
 If so we probably will revert to a static shadow or no shadow at all.
 
 ## Changelog
+
+### Version 0.3.0
+
+- Update compatibility for 7D2D A21.0(b313)
 
 ### Version 0.2.2
 
