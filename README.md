@@ -58,6 +58,11 @@ If so we probably will revert to a static shadow or no shadow at all.
 
 ## Changelog
 
+### Version 0.4.0
+
+- Improvements for A21 compatibility
+- Main issue seems fixed with A21.1
+
 ### Version 0.3.0
 
 - Update compatibility for 7D2D A21.0(b313)

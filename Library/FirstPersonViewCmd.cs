@@ -4,14 +4,14 @@ using UnityEngine;
 public class FirstPersonViewCmd : ConsoleCmdAbstract
 {
 
-    public override string[] GetCommands() => new string[1]
+    protected override string[] getCommands() => new string[1]
     {
         "fpv"
     };
 
-    public override string GetDescription() => "First Person View";
+    protected override string getDescription() => "Mess with first person view settings";
 
-    public override string GetHelp() => "n/a\n";
+    // protected override string getHelp() => "n/a\n";
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
@@ -78,24 +78,6 @@ public class FirstPersonViewCmd : ConsoleCmdAbstract
                 break;
         }
 
-    }
-
-    protected override string[] getCommands()
-    {
-        return new string[] {
-            "on",
-            "off",
-            "pc",
-            "gc",
-            "layers",
-            "pcl",
-            "gcl",
-        };
-    }
-
-    protected override string getDescription()
-    {
-        return "Mess with first person view settings";
     }
 
 }
