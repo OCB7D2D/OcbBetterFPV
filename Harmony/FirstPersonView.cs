@@ -275,10 +275,23 @@ public class FirstPersonView : IModApi
     [HarmonyPatch(typeof(ItemActionZoom), "OnScreenOverlay")]
     public class ItemActionZoomOnScreenOverlayPatch
     {
+        static readonly System.Type ActionDataZoom = AccessTools.TypeByName("ItemActionDataZoom");
+        static readonly FieldInfo ActionDataZoomScope = ActionDataZoom.GetField("Scope");
+        static readonly FieldInfo ActionDataZoomOverlay = ActionDataZoom.GetField("ZoomOverlay");
+        static readonly FieldInfo ActionDataZoomInProgress = ActionDataZoom.GetField("bZoomInProgress");
         public static void Postfix(ItemActionData _actionData)
         {
+            if (Enabled == false) return;
             if (_actionData.invData.holdingEntity is EntityPlayerLocal player)
+            {
+                if (player.AimingGun == false) return;
+                if (ActionDataZoomScope.GetValue(_actionData) == null) return;
+                if ((bool)ActionDataZoomInProgress.GetValue(_actionData)) return;
+                if (ActionDataZoomOverlay.GetValue(_actionData) == null) return;
+                if (player.playerCamera == null) return;
                 UpdatePlayerCameraAndLights(player);
+                player.playerCamera.cullingMask &= -1025;
+            }
         }
     }
 
