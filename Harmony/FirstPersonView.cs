@@ -201,14 +201,14 @@ public class FirstPersonView : IModApi
         {
             if (__instance.CharacterBody is BodyAnimator bodyAnimator)
             {
+                if (LastHeldItem != null)
+                {
+                    LastHeldItem.gameObject.SetActive(false);
+                    Object.Destroy(LastHeldItem.gameObject);
+                    LastHeldItem = null;
+                }
                 if (___entity?.inventory?.GetHoldingItemTransform() is Transform hold)
                 {
-                    if (LastHeldItem != null)
-                    {
-                        LastHeldItem.gameObject.SetActive(false);
-                        Object.Destroy(LastHeldItem.gameObject);
-                        LastHeldItem = null;
-                    }
                     ItemValue _itemValue = ___entity.inventory.holdingItemItemValue;
                     // ToDo: implement some caching to for all slot allocated items
                     Transform heldItem = ___entity.inventory.holdingItem.CloneModel(___entity.world, _itemValue,
@@ -229,7 +229,6 @@ public class FirstPersonView : IModApi
                         rendered.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
                 }
             }
-
         }
     }
 
