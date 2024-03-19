@@ -6,6 +6,13 @@ using UnityEngine;
 public class FirstPersonView : IModApi
 {
 
+    // Shadow setup: We want the third party (full avatar) to
+    // produce a shadow, but don't want to see the actual model.
+    // Via `UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly`
+    // We don't want the head light to produce any shadows for
+    // the hand item or avatar either, to avoid self-shadowing.
+    // By setting the layer to one that the light doesn't shadow
+
     public void InitMod(Mod mod)
     {
         Log.Out("OCB Harmony Patch: " + GetType().ToString());
@@ -78,13 +85,14 @@ public class FirstPersonView : IModApi
             {
                 // Do not shine light on player model (avoid weird shadows)
                 light.cullingMask &= ~(1 << Constants.cLayerLocalPlayer);
-                light.cullingMask &= ~(1 << Constants.cLayerHoldingItem);
-                // light.cullingMask |= 1 << Constants.cLayerHoldingItem;
+                // light.cullingMask &= ~(1 << Constants.cLayerHoldingItem);
+                light.cullingMask |= 1 << Constants.cLayerHoldingItem;
                 // Adjust shadow plane to not shade holding item
                 // Holding item can create weird/irritating shadows
-                // light.shadowNearPlane = 0.95f;
+                // light.shadowNearPlane = 0.95f; // 0.2f
                 // light.shadowBias = 0.25f;
             }
+            // This will also disable some post effects!?
             // player.weaponCamera.enabled = false;
         }
         else
@@ -138,14 +146,16 @@ public class FirstPersonView : IModApi
             if (__instance.FPSArms is BodyAnimator fpsArmsAnimator)
             {
                 fpsArmsAnimator.State = BodyAnimator.EnumState.Visible;
+                /* Is this really needed anymore?
                 if (fpsArmsAnimator.Parts.RightHandT is Transform handTransform)
                 {
                     foreach (var hand in handTransform.GetComponentsInChildren<Renderer>())
                     {
                         // Enable shadow casting for the "first person view hand object"
-                        // hand.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                        hand.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
                     }
                 }
+                */
                 if (fpsArmsAnimator.Parts.BodyObj.transform is Transform bodyTransform)
                 {
                     foreach (var arm in bodyTransform.GetComponentsInChildren<Renderer>())
@@ -159,6 +169,7 @@ public class FirstPersonView : IModApi
         }
     }
 
+    /* Is this really needed anymore?
     [HarmonyPatch(typeof(EModelBase), "SwitchModelAndView")]
     public class EModelBase_SwitchModelAndView
     {
@@ -169,12 +180,13 @@ public class FirstPersonView : IModApi
                 foreach (var hand in handTransform.GetComponentsInChildren<Renderer>())
                 {
                     // Disable shadow casting for the "first person view hand object"
-                    hand.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    // hand.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 }
 
             }
         }
     }
+    */
 
     static Transform LastHeldItem = null;
 
@@ -205,8 +217,8 @@ public class FirstPersonView : IModApi
                     heldItem.parent = bodyAnimator.Parts.RightHandT;
                     heldItem.localPosition = Vector3.zero;
                     heldItem.localRotation = Quaternion.identity;
-                    heldItem.SetChildLayer(Constants.cLayerHoldingItem);
-                    heldItem.gameObject.layer = Constants.cLayerHoldingItem;
+                    heldItem.SetChildLayer(Constants.cLayerLocalPlayer);
+                    heldItem.gameObject.layer = Constants.cLayerLocalPlayer;
                     heldItem.gameObject.SetActive(true);
                     heldItem.name += "(Shadow)";
                     // Disable shadows for the hand held item in the fpsArms
