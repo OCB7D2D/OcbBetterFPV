@@ -58,6 +58,12 @@ If so we probably will revert to a static shadow or no shadow at all.
 
 ## Changelog
 
+### Version 0.4.1
+
+- Fix issue when zooming into weapon scopes
+- Fix issue with held item copy not being reset
+- Improve layer settings to avoid self-shadowing
+
 ### Version 0.4.0
 
 - Improvements for A21 compatibility
