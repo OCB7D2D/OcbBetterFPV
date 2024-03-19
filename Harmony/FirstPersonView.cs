@@ -78,10 +78,12 @@ public class FirstPersonView : IModApi
             {
                 // Do not shine light on player model (avoid weird shadows)
                 light.cullingMask &= ~(1 << Constants.cLayerLocalPlayer);
-                light.cullingMask |= 1 << Constants.cLayerHoldingItem;
-                // Check if these are still needed?
-                light.shadowNearPlane = 0.55f;
-                light.shadowBias = 0.25f;
+                light.cullingMask &= ~(1 << Constants.cLayerHoldingItem);
+                // light.cullingMask |= 1 << Constants.cLayerHoldingItem;
+                // Adjust shadow plane to not shade holding item
+                // Holding item can create weird/irritating shadows
+                // light.shadowNearPlane = 0.95f;
+                // light.shadowBias = 0.25f;
             }
             // player.weaponCamera.enabled = false;
         }
@@ -129,7 +131,6 @@ public class FirstPersonView : IModApi
 
             // This has some interesting side effects ...
             //__instance.PrimaryBody = __instance.CharacterBody;
-            /*
             // Abort now, nothing to revert from this point on
             if (Enabled == false || _bFPV == false) return;
 
@@ -139,7 +140,6 @@ public class FirstPersonView : IModApi
                 fpsArmsAnimator.State = BodyAnimator.EnumState.Visible;
                 if (fpsArmsAnimator.Parts.RightHandT is Transform handTransform)
                 {
-                    // Log.Out("Gotcha hand transform {0}", handTransform);
                     foreach (var hand in handTransform.GetComponentsInChildren<Renderer>())
                     {
                         // Enable shadow casting for the "first person view hand object"
@@ -155,11 +155,10 @@ public class FirstPersonView : IModApi
                     }
                 }
             }
-            */
 
         }
     }
-    /*
+
     [HarmonyPatch(typeof(EModelBase), "SwitchModelAndView")]
     public class EModelBase_SwitchModelAndView
     {
@@ -176,7 +175,6 @@ public class FirstPersonView : IModApi
             }
         }
     }
-    */
 
     static Transform LastHeldItem = null;
 
