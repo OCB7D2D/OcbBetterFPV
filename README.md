@@ -58,6 +58,10 @@ If so we probably will revert to a static shadow or no shadow at all.
 
 ## Changelog
 
+### Version 0.4.2
+
+- Fix issue with duplicate particle effects
+
 ### Version 0.4.1
 
 - Fix issue when zooming into weapon scopes

@@ -188,6 +188,40 @@ public class FirstPersonView : IModApi
     }
     */
 
+    // Ensure that parts are added to the correct model
+    [HarmonyPatch(typeof(MinEventActionAddPart), "Execute")]
+    public class MinEventActionAddPartExecutePatch
+    {
+        static void Postfix(MinEventParams _params, bool __state)
+        {
+            if (!(_params.Self is EntityPlayerLocal self)) return;
+            self.vp_FPCamera.Locked3rdPerson = __state;
+        }
+        static void Prefix(MinEventParams _params, ref bool __state)
+        {
+            if (!(_params.Self is EntityPlayerLocal self)) return;
+            __state = self.vp_FPCamera.Locked3rdPerson;
+            self.vp_FPCamera.Locked3rdPerson = true;
+        }
+    }
+
+    // Ensure that parts are removed from the correct model
+    [HarmonyPatch(typeof(MinEventActionRemovePart), "Execute")]
+    public class MinEventActionRemovePartExecutePatch
+    {
+        static void Postfix(MinEventParams _params, bool __state)
+        {
+            if (!(_params.Self is EntityPlayerLocal self)) return;
+            self.vp_FPCamera.Locked3rdPerson = __state;
+        }
+        static void Prefix(MinEventParams _params, ref bool __state)
+        {
+            if (!(_params.Self is EntityPlayerLocal self)) return;
+            __state = self.vp_FPCamera.Locked3rdPerson;
+            self.vp_FPCamera.Locked3rdPerson = true;
+        }
+    }
+
     static Transform LastHeldItem = null;
 
     // Clone hold item and put it into the third party player hand
