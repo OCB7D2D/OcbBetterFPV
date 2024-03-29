@@ -1,6 +1,8 @@
 using HarmonyLib;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 public class FirstPersonView : IModApi
@@ -369,6 +371,55 @@ public class FirstPersonView : IModApi
         {
             if (GameManager.Instance.World.GetPrimaryPlayer() is EntityPlayerLocal player)
                 UpdatePlayerCameraAndLights(player);
+        }
+    }
+
+    // Ensure that some added prefabs to local player are only casting shadows
+    [HarmonyPatch(typeof(MinEventActionAttachPrefabToEntity), "Execute")]
+    public class MinEventActionAttachPrefabToEntityExecutePatch
+    {
+        static readonly System.Type typeid = typeof(MinEventActionAttachPrefabToEntityExecutePatch);
+        static readonly MethodInfo hook = AccessTools.Method(typeid, "FixShadowCastingMode");
+        // Make sure model is not seens and only casts shadows
+        static void FixShadowCastingMode(Transform prefab)
+        {
+            foreach (var rendered in prefab.GetComponentsInChildren<Renderer>(true))
+                rendered.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+        }
+        // Append to function to modify instantiated model
+        static IEnumerable<CodeInstruction> Transpiler
+            (IEnumerable<CodeInstruction> instructions)
+        {
+            var codes = new List<CodeInstruction>(instructions);
+            codes.Insert(codes.Count - 1, codes[codes.Count - 5]); // Hard-coded position
+            codes.Insert(codes.Count - 1, new CodeInstruction(OpCodes.Call, hook)); // invoke
+            return codes;
+        }
+    }
+
+    // Skip to show some particles effect for local player model
+    [HarmonyPatch(typeof(EntityAlive), "AttachParticle")]
+    public class EntityAliveAttachParticlePatch
+    {
+        static void Postfix(EntityAlive __instance, string parentTransformPath)
+        {
+            // Only apply special case on local player and for `TorchLight` target
+            if (__instance is EntityPlayerLocal && parentTransformPath == "TorchLight")
+            {
+                // Copied the code path to find the relevant transform the particle was added to
+                if (GameUtils.FindDeepChild(__instance.transform, parentTransformPath) is Transform child)
+                {
+                    // Make sure light is not casting shadows on our player model
+                    // Otherwise casts a very close and irritating player shadow
+                    foreach (var light in child.GetComponentsInChildren<Light>(true))
+                    {
+                        // Do not shine light on player model (avoid weird shadows)
+                        light.cullingMask &= ~(1 << Constants.cLayerLocalPlayer);
+                        // light.cullingMask &= ~(1 << Constants.cLayerHoldingItem);
+                        light.cullingMask |= 1 << Constants.cLayerHoldingItem;
+                    }
+                }
+            }
         }
     }
 
