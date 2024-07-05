@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FirstPersonViewCmd : ConsoleCmdAbstract
 {
 
-    protected override string[] getCommands() => new string[1]
+    public override string[] getCommands() => new string[1]
     {
         "fpv"
     };
 
-    protected override string getDescription() => "Mess with first person view settings";
+    public override string getDescription() => "Mess with first person view settings";
 
     // protected override string getHelp() => "n/a\n";
 
@@ -24,10 +25,13 @@ public class FirstPersonViewCmd : ConsoleCmdAbstract
                 switch (_params[0])
                 {
                     case "on":
-                        FirstPersonView.Enable(true);
+                        //FirstPersonView.Enable(true);
                         break;
                     case "off":
-                        FirstPersonView.Enable(false);
+                        //FirstPersonView.Enable(false);
+                        break;
+                    case "dbg":
+                        DebugAvatarAndCams(player);
                         break;
                     case "pc":
                         if (player == null) break;
@@ -80,4 +84,56 @@ public class FirstPersonViewCmd : ConsoleCmdAbstract
 
     }
 
+    private void DebugTransform(Transform transform, string ind = "")
+    {
+        Log.Out(ind + "  {0}", transform);
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            DebugTransform(child, ind + "  ");
+        }
+    }
+
+    private void DebugAvatarAndCams(EntityPlayerLocal player)
+    {
+        Log.Out("player cam cullingMask: 1024: {0}", player.playerCamera.cullingMask & 1024);
+        Log.Out("weapon cam cullingMask: 1024: {0}", player.weaponCamera.cullingMask & 1024);
+        DebugTransform(player.emodel.transform);
+        if (player.emodel.avatarController is AvatarController avatar)
+        {
+            Log.Out("Got an Avatar {0}", avatar);
+            if (avatar is AvatarCharacterController character)
+            {
+                Log.Out("Is character controller {0} (enabled {1})", character, character.enabled);
+            }
+
+            if (avatar is AvatarLocalPlayerController local)
+            {
+                Log.Out("Is local Avatar {0} (enabled {1})", local, local.enabled);
+                Log.Out("Found character body animator {0} (enabled {1})",
+                    local.characterBody, local.characterBody.state);
+                local.enabled = true;
+                if (local.FPSArms is BodyAnimator arms)
+                {
+                    Log.Out(" found arms animator {0} => {1} (enabled {2})",
+                        arms, arms.state, arms.Animator.enabled);
+                }
+                foreach (var animator in local.BodyAnimators)
+                {
+                    if (animator is BodyAnimator body)
+                    {
+                        Log.Out(" found body animator {0} => {1} (enabled {2})",
+                            body, body.state, body.Animator.enabled);
+                        body.Animator.enabled = true;
+                    }
+                }
+                foreach (var renderer in local.transform.GetComponentsInChildren<Renderer>(true))
+                {
+                    Log.Out("  => {0}", renderer);
+                    renderer.enabled = true;
+                }
+            }
+        }
+
+    }
 }
